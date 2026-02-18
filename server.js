@@ -1,6 +1,6 @@
 import express from "express";
 import multer from "multer";
-import { extract } from "@gqgs/mkv-extract";
+import { extract } from "mkv-extract";
 import fs from "fs";
 import { convert } from "subtitle-converter";
 
