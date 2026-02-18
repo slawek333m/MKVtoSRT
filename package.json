@@ -9,8 +9,7 @@
   "dependencies": {
     "express": "^4.18.2",
     "multer": "^1.4.5",
-    "@gqgs/mkv-extract": "^1.0.0",
+    "mkv-extract": "github:qgustavor/mkv-extract",
     "subtitle-converter": "^1.0.0"
   }
 }
-
