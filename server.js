@@ -2,15 +2,14 @@ import express from "express";
 import multer from "multer";
 import { extract } from "mkv-extract";
 import fs from "fs";
-import { execSync } from "child_process";
+import { convert } from "subtitle-converter";
 
 const app = express();
 const upload = multer({ dest: "uploads/" });
 
 // 🔥 Twój tłumacz SRT (tu wstawiasz własną funkcję)
 async function translateSRT(text, targetLang = "pl") {
-  // tu wstawiasz swój tłumacz
-  return text; // na razie zwracamy bez zmian
+  return text; // na razie bez tłumaczenia
 }
 
 app.post("/extract", upload.single("file"), async (req, res) => {
@@ -21,24 +20,20 @@ app.post("/extract", upload.single("file"), async (req, res) => {
     const assPath = mkvPath + ".ass";
     await extract(mkvPath, { tracks: ["subtitles"], output: assPath });
 
-    // 2. Konwersja ASS → SRT (ffmpeg)
-    const srtPath = mkvPath + ".srt";
-    execSync(`ffmpeg -i ${assPath} ${srtPath}`);
+    // 2. Konwersja ASS → SRT (bez FFmpeg)
+    const assContent = fs.readFileSync(assPath, "utf8");
+    const srtText = await convert(assContent, { format: "srt" });
 
-    // 3. Wczytujemy SRT
-    let srtText = fs.readFileSync(srtPath, "utf8");
-
-    // 4. Tłumaczenie
+    // 3. Tłumaczenie
     const translated = await translateSRT(srtText, "pl");
 
-    // 5. Zwracamy gotowy SRT
+    // 4. Zwracamy gotowy SRT
     res.setHeader("Content-Type", "text/plain");
     res.send(translated);
 
-    // 6. Sprzątanie
+    // 5. Sprzątanie
     fs.unlinkSync(mkvPath);
     fs.unlinkSync(assPath);
-    fs.unlinkSync(srtPath);
 
   } catch (err) {
     console.error(err);
